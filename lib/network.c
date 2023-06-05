@@ -1,6 +1,3 @@
-/* NETWORK.C  */
-
-/* PREPROCESSORS */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,11 +10,7 @@
 #include <netinet/tcp.h>
 #include <linux/socket.h>
 
-/* FUNCTION PROTOTYPES */
-int listenAtPort(int portnum);
-int connectToServer(const char* ip, int port);
-int sendMessage(int conn_fd, const char* message);
-int receiveMessage(int conn_fd, char* buffer, int buffer_size);
+#include "network.h"
 
 /* MAIN FUNCTION */
 int main(int argc, char* argv[]) {
@@ -145,15 +138,15 @@ int connectToServer(const char* ip, int port) {
 	return sock_fd;
 }
 
-int sendMessage(int conn_fd, const char* message) {
+int sendMessage(int connFd, const char* message) {
 	int len = strlen(message);
-	int bytes_sent = send(conn_fd, message, len, 0);
-	return bytes_sent;
+	int sent = send(connFd, message, len, 0);
+	return sent;
 }
 
-int receiveMessage(int conn_fd, char* buffer, int buffer_size) {
-	int bytes_received = recv(conn_fd, buffer, buffer_size - 1, 0);
-	if (bytes_received > 0) buffer[bytes_received] = '\0';
+int receiveMessage(int connFd, char* buf, int bufSize) {
+	int received = recv(connFd, buf, bufSize - 1, 0);
+	if (received > 0) buffer[received] = '\0';
 
 	return bytes_received;
 }
