@@ -2,7 +2,7 @@
 
 ## Description
 
-* 이 프로젝트는 UI를 위한 `ncurses` 라이브러리와 멀티플레이어 기능을 위한 `sockets`를 사용하여 C에서 구현한 **리버시 게임** 입니다.
+* 이 프로젝트는 UI를 위한 `ncurses` 라이브러리와 멀티플레이어 기능을 위한 `socket`을 사용하여 C에서 구현한 **리버시 게임** 입니다.
 
 ## Features
 
@@ -40,10 +40,10 @@ make
   * server ip 와 port 번호를 입력합니다.
   
   ```
-  ./reversi -server 8888            # for server
+  ./reversi -server [Port]            # for server
   ```
   ```
-  ./reversi -client 127.0.0.1 8888  # for client
+  ./reversi -client [Ip addr] [Port]  # for client
   ```
   
   ## Usage
