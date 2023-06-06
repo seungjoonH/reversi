@@ -1,14 +1,20 @@
-#include "ui.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <ncurses.h>
 
-const int gridLty = 10;
-const int gridLtx = 5;
-const int gridR = 8;
-const int gridC = 8;
-const int gridSize = 4;
+#include "ui.h"
+#include "network.h"
+
+int gridLty = 10;
+int gridLtx = 5;
+int gridR = 8;
+int gridC = 8;
+int gridSize = 4;
+int pY = 4;
+int pX = 4;
+
+int getCh() { return getch(); }
 
 void logo(int lty, int ltx) {
 	mvprintw(lty + 0, ltx, "  _____  ________      ________ _____   _____ _____ ");
@@ -44,7 +50,7 @@ void fill(int lty, int ltx, int size, int player) {
 	attroff(COLOR_PAIR(color));
 }
 
-void drawGrid(int pY, int pX) {
+void drawGrid() {
 	int lty = gridLty;
 	int ltx = gridLtx;
 	int s = gridSize;
@@ -75,9 +81,21 @@ void drawGrid(int pY, int pX) {
 	attron(COLOR_PAIR(1));
 	rectangle(lty + s * pY, ltx + s * 2 * pX, s * 2, s);
 	attroff(COLOR_PAIR(1));
+
+	for (int i = 0; i < r; i++) {
+		int y = lty + i * s + 1;
+		for (int j = 0; j < c; j++) {
+			int x = ltx + j * s * 2 + 1;
+			if (data[i][j]) fill(y, x, s, data[i][j]);
+		}
+	}
 }
 
-void initBoard(int **data) {
+void initBoard() {	
+	data = (int **) malloc(gridR * sizeof(int *));
+	for (int i = 0; i < gridR; i++) 
+		data[i] = (int *) malloc(gridC * sizeof(int));
+
 	for (int i = 0; i < gridR; i++)
 		for (int j = 0; j < gridC; j++)
 			data[i][j] = 0;
@@ -87,41 +105,50 @@ void initBoard(int **data) {
 	data[gridR / 2 - 1][gridC / 2 - 1] = 1;
 }
 
-void drawBoard(int **data) {
-	int lty = gridLty + 1;
-	int ltx = gridLtx + 1;
-	int s = gridSize;
-	int r = gridR;
-	int c = gridC;
-
-	for (int i = 0; i < r; i++) {
-		int y = lty + i * s;
-		for (int j = 0; j < c; j++) {
-			int x = ltx + j * s * 2;
-			if (data[i][j]) fill(y, x, s, data[i][j]);
+int execute() {
+	int c, term = 0;
+	while ((c = getch())) {
+		term = 0;
+		switch (c) {
+			case KEY_LEFT: left(); break; 
+			case KEY_RIGHT: right(); break; 
+			case KEY_UP: up(); break; 
+			case KEY_DOWN: down(); break; 
+			case ' ': space();
+			case 'q': term = 1; break;
 		}
+		redraw();
+		if (term) return c;
 	}
 }
 
-void put(int **data, int pY, int pX, int val) {
+void left() { if (pX > 0) pX--; }
+void right() { if (pX < gridC - 1) pX++; }
+void up() { if (pY > 0) pY--; }
+void down() { if (pY < gridR - 1) pY++; }
+void space() { put(role); }
+
+void put(int val) {
 	data[pY][pX] = val;
-	drawBoard(data);
+	drawGrid();
 }
 
-void showUI() {
-	initscr();
-
+void setColor() {
 	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_BLUE, COLOR_BLUE);
 	init_pair(3, COLOR_RED, COLOR_RED);
+}
 
-	int **board;
+void redraw() {
+	drawGrid();
+	refresh();
+}
 
-	board = (int **) malloc(gridR * sizeof(int *));
-	for (int i = 0; i < gridR; i++) 
-		board[i] = (int *) malloc(gridC * sizeof(int));
-
+void initUI() {
+	initscr();
+	setColor();
+	
 	clear();
 	cbreak();
 	keypad(stdscr, TRUE);
@@ -129,31 +156,13 @@ void showUI() {
 
 	curs_set(0);
 
-	int c;
-	int pY = 4, pX = 4;
-
 	logo(2, 11);
-	initBoard(board);
-	drawGrid(pX, pY);
-	drawBoard(board);
-	refresh();
+	initBoard();
 
-	while ((c = getch())) {
-		switch (c) {
-			case KEY_LEFT: if (pX > 0) pX--; break;
-			case KEY_RIGHT: if (pX < gridC - 1) pX++; break;
-			case KEY_UP: if (pY > 0) pY--; break;
-			case KEY_DOWN: if (pY < gridR - 1) pY++; break;
-			case ' ': put(board, pY, pX, 1); break;
-			default: break;
-		}
+	redraw();
+}
 
-		drawGrid(pY, pX);
-		refresh();
-	}
-
+void disposeUI() {
 	endwin();
-
-	for (int i = 0; i < gridR; i++) free(board[i]);
-	free(board);
+	free(data);
 }

@@ -1,9 +1,9 @@
-#ifndef _ENUM_H
-#define _ENUM_H
+#ifndef _ENUMS_H
+#define _ENUMS_H
 
 typedef enum {
 	CLIENT = -1,
-	SERVER
+	SERVER = 1
 } Role;
 
 typedef enum {

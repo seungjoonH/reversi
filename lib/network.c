@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -10,68 +11,128 @@
 #include <netinet/tcp.h>
 #include <linux/socket.h>
 
+#include "ui.h"
 #include "network.h"
+#include "system.h"
 
-/* MAIN FUNCTION */
-int main(int argc, char* argv[]) {
-	if (argc != 4) {
-		fprintf(stderr, "Wrong number of arguments\n");
-		fprintf(stderr, "Usage: ./network [role] [IP addr] [Port num]\n");
-		exit(EXIT_FAILURE);
+void setArgs() {
+	role = getRole();
+	ip = getIp();
+	port = getPort();
+}
+
+void rungame() {
+	setArgs();
+
+	switch (role) {
+		case CLIENT: runClient(); break;
+		case SERVER: runServer(); break;
+		default: break;
+	}
+}
+
+void runClient() {
+	int c;
+	int connFd = connectToServer(ip, port);
+
+	initUI();
+
+	while (1) {
+		char received[256];
+		int bytes = receiveMessage(connFd, received, sizeof(received));
+		if (bytes > 0) data = decodeData(received);
+
+		redraw();
+
+		c = execute();
+		if (c == 'q') { disposeUI(); break; }
+
+		redraw();
+
+		char *encoded = encodeData(data);
+		sendMessage(connFd, encoded);
 	}
 
-	const char* role = argv[1];
-	const char* ip = argv[2];
-	int port = atoi(argv[3]);
+	shutdown(connFd, SHUT_RDWR);
+}
 
-	if (!strcmp(role, "server")) {
-		int conn_fd = listenAtPort(port);
+void runServer() {
+	int c;
+	int connFd = listenAtPort(port);
 
-		while (1) {
-			// received message from client
-			char received[256];
-			int bytes = receiveMessage(conn_fd, received, sizeof(received));
-			if (bytes > 0) printf("Client: %s\n", received);
+	initUI();
 
-			// message to send
-			char message[256];
-			printf("To client: ");
-			fgets(message, sizeof(message), stdin);
-			message[strlen(message) - 1] = '\0';
+	while (1) {
+		char *encoded = encodeData(data);
+		sendMessage(connFd, encoded);
 
-			if (!strcmp(message, "quit")) break;
-			sendMessage(conn_fd, message);
-		}
-	} 
-	else if (!strcmp(role, "client")) {
-		int conn_fd = connectToServer(ip, port);
+		char received[256];
+		int bytes = receiveMessage(connFd, received, sizeof(received));
+		if (bytes > 0) data = decodeData(received);
+		
+		redraw();
 
-		while (1) {
-			// message to send
-			char message[256];
-			printf("To server: ");
-			fgets(message, sizeof(message), stdin);
-			message[strlen(message) - 1] = '\0';
-
-			if (!strcmp(message, "quit")) break;
-			sendMessage(conn_fd, message);
-
-			// received message from server
-			char received[256];
-			int bytes = receiveMessage(conn_fd, received, sizeof(received));
-			if (bytes > 0) printf("Server: %s\n", received);
-		}
-	} 
-	else {
-		fprintf(stderr, "Invalid role\n");
-		exit(EXIT_FAILURE);
+		c = execute();
+		if (c == 'q') { disposeUI(); break; }
+		
+		redraw();
 	}
 
-	return EXIT_SUCCESS;
+	shutdown(connFd, SHUT_RDWR);
+}
+
+char *encodeData(int **data) {
+	char *encoded = (char *) malloc(100 * sizeof(char));
+	encoded[0] = '\0';
+
+	for (int i = 0; i < gridR; i++) {
+		char row[30];
+		row[0] = '\0';
+
+		for (int j = 0; j < gridC; j++) {
+			char e[2];
+			sprintf(e, "%d", data[i][j]);
+			strcat(row, e);
+			strcat(row, ",");
+		}
+
+		strcat(encoded, row);
+		strcat(encoded, ";");
+	}
+
+	return encoded;
+}
+
+int** decodeData(char* str) {
+	int** decoded = (int**)malloc(gridR * sizeof(int*));
+	for (int i = 0; i < gridR; i++) {
+		decoded[i] = (int*)malloc(gridC * sizeof(int));
+	}
+
+	char* token = str;
+	int rowIndex = 0;
+	int colIndex = 0;
+	while (*token != '\0') {
+		if (*token == ',' || *token == ';') {
+			token++; continue;
+		}
+
+		if (colIndex >= gridC) {
+			rowIndex++;
+			colIndex = 0;
+		}
+
+		decoded[rowIndex][colIndex] = atoi(token);
+		colIndex++;
+
+		token = strchr(token, ',');
+		if (token == NULL) break;
+	}
+
+	return decoded;
 }
 
 
-/* FUNCTIONS */
 int listenAtPort(int portnum) {
 	int sock_fd = socket(AF_INET /*IPv4*/, SOCK_STREAM /*TCP*/, 0 /*IP*/);
 	if (sock_fd == 0)  {
@@ -146,8 +207,7 @@ int sendMessage(int connFd, const char* message) {
 
 int receiveMessage(int connFd, char* buf, int bufSize) {
 	int received = recv(connFd, buf, bufSize - 1, 0);
-	if (received > 0) buffer[received] = '\0';
-
-	return bytes_received;
+	if (received > 0) buf[received] = '\0';
+	return received;
 }
 
