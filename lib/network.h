@@ -7,6 +7,8 @@ Role role;
 char *ip;
 int port;
 
+Role turn;
+
 void setArgs();
 void rungame();
 void runClient();

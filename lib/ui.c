@@ -78,9 +78,11 @@ void drawGrid() {
 		mvaddch(lty + r * s, x, ACS_BTEE);
 	}
 
-	attron(COLOR_PAIR(1));
-	rectangle(lty + s * pY, ltx + s * 2 * pX, s * 2, s);
-	attroff(COLOR_PAIR(1));
+	if (role == turn) {
+		attron(COLOR_PAIR(1));
+		rectangle(lty + s * pY, ltx + s * 2 * pX, s * 2, s);
+		attroff(COLOR_PAIR(1));
+	}
 
 	for (int i = 0; i < r; i++) {
 		int y = lty + i * s + 1;
@@ -107,6 +109,7 @@ void initBoard() {
 
 int execute() {
 	int c, term = 0;
+	flushinp();
 	while ((c = getch())) {
 		term = 0;
 		switch (c) {
@@ -114,7 +117,7 @@ int execute() {
 			case KEY_RIGHT: right(); break; 
 			case KEY_UP: up(); break; 
 			case KEY_DOWN: down(); break; 
-			case ' ': space();
+			case ' ': if (space()) break;
 			case 'q': term = 1; break;
 		}
 		redraw();
@@ -126,18 +129,20 @@ void left() { if (pX > 0) pX--; }
 void right() { if (pX < gridC - 1) pX++; }
 void up() { if (pY > 0) pY--; }
 void down() { if (pY < gridR - 1) pY++; }
-void space() { put(role); }
+int space() { return put(role); }
 
-void put(int val) {
+int put(int val) {
+	if (data[pY][pX]) return 1;
 	data[pY][pX] = val;
 	drawGrid();
+	return 0;
 }
 
 void setColor() {
 	start_color();
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	init_pair(2, COLOR_BLUE, COLOR_BLUE);
-	init_pair(3, COLOR_RED, COLOR_RED);
+	init_pair(1, COLOR_RED, COLOR_RED);
+	init_pair(2, COLOR_GREEN, COLOR_GREEN);
+	init_pair(3, COLOR_WHITE, COLOR_WHITE);
 }
 
 void redraw() {
@@ -163,6 +168,7 @@ void initUI() {
 }
 
 void disposeUI() {
+	attroff(1);
 	endwin();
 	free(data);
 }

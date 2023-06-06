@@ -1,12 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ncurses.h>
 
 #include "enums.h"
 #include "system.h"
 
 char *errMsg[ERR_LEN] = {
-	"Wrong number of arguments\nUsage:\n./reversi -server [Port]\n./reversi -client [Ip addr] [Port]"
+	"Wrong number of arguments\nUsage:\n./reversi -server [Port]\n./reversi -client [Ip addr] [Port]",
+	"Server closed",
+	"Socket failed",
+	"Fail at setsockopt",
+	"Bind failed",
+	"Listen failed",
+	"Accept failed",
+	"inet_pton failed",
+	"connect failed"
 };
 
 void terminate(ErrorType type) {

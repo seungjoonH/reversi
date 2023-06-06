@@ -26,9 +26,9 @@ void left();
 void right();
 void up();
 void down();
-void space();
+int space();
 
-void put(int val);
+int put(int val);
 void setColor();
 void redraw();
 void initUI();
