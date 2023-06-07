@@ -16,7 +16,8 @@
 이 프로젝트를 실행하기 위해서는 다음이 필요합니다.
 
 * C compiler
-* Socket server
+* `ncurses` library
+* `socket` server
 * Linux OS
 
 ## How to build
