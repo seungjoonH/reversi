@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "enums.h"
 #include "ui.h"
@@ -86,4 +87,25 @@ void dirSearch(int i, int j, Direction dir, int value) {
 
 void flip(int i, int j) {
 	eightDirSearch(i, j, role);
+}
+
+
+bool noAvailable() {
+	int r = gridR;
+	int c = gridC;
+
+	for (int i = 0; i < r; i++)
+		for (int j = 0; j < c; j++)
+			if (data[i][j] == 2 * role) return false;
+	return true;
+}
+
+bool isFull() {
+	int r = gridR;
+	int c = gridC;
+
+	for (int i = 0; i < r; i++)
+		for (int j = 0; j < c; j++)
+			if (!data[i][j]) return false;
+	return true;
 }

@@ -117,6 +117,8 @@ void initBoard() {
 int execute() {
 	int c, term = 0;
 	flushinp();
+	
+	if (noAvailable()) return 0;
 	while ((c = getch())) {
 		term = 0;
 		switch (c) {
@@ -130,6 +132,7 @@ int execute() {
 		redraw();
 		if (term) return c;
 	}
+	return 0;
 }
 
 void left() { if (pX > 0) pX--; }
