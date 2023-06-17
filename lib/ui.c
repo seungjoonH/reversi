@@ -226,9 +226,4 @@ void isFinished() {
 	else lose(10, 11);
 
 	refresh();
-	
-	getch();
-	disposeUI();
-
-	exit(0);
 }
