@@ -37,6 +37,7 @@ void rungame() {
 void runClient() {
 	int c;
 	int connFd = connectToServer(ip, port);
+	bool finished = false;
 
 	initUI();
 
@@ -54,8 +55,8 @@ void runClient() {
 		received[0] = '\0';
 
 		int bytes = receiveMessage(connFd, received, sizeof(received));
-		if (!strcmp(received, "GAME_FINISHED")) {
-			isFinished(); getCh(); break;
+		if (!strcmp(received, "GAME_FINISHED")) { 
+			finished = true; isFinished(); break; 
 		}
 		else if (!strcmp(received, "SERVER_CLOSED")) {
 			disposeUI();
@@ -76,6 +77,7 @@ void runClient() {
 		if (c == -1) { 
 			sendMessage(connFd, "GAME_FINISHED");
 			isFinished();
+			break;
 		}
 		if (c == 'q') {
 			sendMessage(connFd, "CLIENT_CLOSED");
@@ -85,6 +87,8 @@ void runClient() {
 		redraw();
 	}
 	
+	
+	if (finished) getCh();
 	disposeUI();
 	shutdown(connFd, SHUT_RDWR);
 }
@@ -92,6 +96,7 @@ void runClient() {
 void runServer() {
 	int c;
 	int connFd = listenAtPort(port);
+	bool finished = false;
 
 	initUI();
 	
@@ -100,7 +105,7 @@ void runServer() {
 		received[0] = '\0';
 
 		int bytes = receiveMessage(connFd, received, sizeof(received));
-		if (!strcmp(received, "GAME_FINISHED")) isFinished();
+		if (!strcmp(received, "GAME_FINISHED")) { isFinished(); break; }
 		else if (!strcmp(received, "CLIENT_CLOSED")) break;
 
 		if (bytes > 0) {
@@ -113,10 +118,7 @@ void runServer() {
 		c = execute();
 		if (c == -1) {
 			sendMessage(connFd, "GAME_FINISHED");
-			bytes = receiveMessage(connFd, received, sizeof(received));
-			if (!strcmp(received, "GAME_FINISHED")) {
-				isFinished(); getCh(); break;
-			}
+			finished = true; isFinished(); break;
 		}
 		if (c == 'q') {
 			received[0] = '\0';
@@ -135,6 +137,7 @@ void runServer() {
 		redraw();
 	}
 
+	if (finished) getCh();
 	disposeUI();
 	shutdown(connFd, SHUT_RDWR);
 }
