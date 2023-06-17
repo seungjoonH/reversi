@@ -3,7 +3,7 @@ LDFLAGS=-lncurses
 
 all: reversi
 
-reversi: obj/ui.o obj/system.o obj/network.o obj/reversi.o
+reversi: obj/ui.o obj/system.o obj/network.o obj/logic.o obj/reversi.o
 	$(CC) -o reversi obj/*.o $(LDFLAGS)
 
 obj/ui.o: lib/ui.c lib/ui.h
@@ -14,6 +14,9 @@ obj/system.o: lib/system.c lib/system.h
 
 obj/network.o: lib/network.c lib/network.h
 	$(CC) -c lib/network.c -o obj/network.o
+
+obj/logic.o: lib/logic.c lib/logic.h
+	$(CC) -c lib/logic.c -o obj/logic.o
 
 obj/reversi.o: reversi.c
 	$(CC) -c reversi.c -o obj/reversi.o

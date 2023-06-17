@@ -5,6 +5,7 @@
 
 #include "ui.h"
 #include "network.h"
+#include "logic.h"
 
 int gridLty = 10;
 int gridLtx = 5;
@@ -39,8 +40,8 @@ void rectangle(int lty, int ltx, int w, int h) {
 	mvaddch(rby, rbx, ACS_LRCORNER);
 }
 
-void fill(int lty, int ltx, int size, int player) {
-	int color = (player > 0) + 2;
+void fill(int lty, int ltx, int size, int value) {
+	int color = value + 3;
 	attron(COLOR_PAIR(color));
 
 	for (int i = 0; i < size - 1; i++)
@@ -79,23 +80,23 @@ void drawGrid() {
 	}
 
 	if (role == turn) {
-		attron(COLOR_PAIR(1));
+		attron(COLOR_PAIR(6));
 		rectangle(lty + s * pY, ltx + s * 2 * pX, s * 2, s);
-		attroff(COLOR_PAIR(1));
+		attroff(COLOR_PAIR(6));
 	}
 
 	for (int i = 0; i < r; i++) {
 		int y = lty + i * s + 1;
 		for (int j = 0; j < c; j++) {
 			int x = ltx + j * s * 2 + 1;
-			if (data[i][j]) fill(y, x, s, data[i][j]);
+			fill(y, x, s, data[i][j]);
 		}
 	}
 }
 
 void initBoard() {	
 	data = (int **) malloc(gridR * sizeof(int *));
-	for (int i = 0; i < gridR; i++) 
+	for (int i = 0; i < gridR; i++)
 		data[i] = (int *) malloc(gridC * sizeof(int));
 
 	for (int i = 0; i < gridR; i++)
@@ -113,10 +114,10 @@ int execute() {
 	while ((c = getch())) {
 		term = 0;
 		switch (c) {
-			case KEY_LEFT: left(); break; 
-			case KEY_RIGHT: right(); break; 
-			case KEY_UP: up(); break; 
-			case KEY_DOWN: down(); break; 
+			case KEY_LEFT: left(); break;
+			case KEY_RIGHT: right(); break;
+			case KEY_UP: up(); break;
+			case KEY_DOWN: down(); break;
 			case ' ': if (space()) break;
 			case 'q': term = 1; break;
 		}
@@ -132,17 +133,21 @@ void down() { if (pY < gridR - 1) pY++; }
 int space() { return put(role); }
 
 int put(int val) {
-	if (data[pY][pX]) return 1;
+	if (data[pY][pX] != role * 2) return 1;
 	data[pY][pX] = val;
-	drawGrid();
+	flip(pY, pX);
+	redraw();
 	return 0;
 }
 
 void setColor() {
 	start_color();
-	init_pair(1, COLOR_RED, COLOR_RED);
-	init_pair(2, COLOR_GREEN, COLOR_GREEN);
-	init_pair(3, COLOR_WHITE, COLOR_WHITE);
+	init_pair(1, COLOR_MAGENTA, COLOR_MAGENTA);
+	init_pair(2, COLOR_RED, COLOR_RED);
+	init_pair(3, COLOR_BLACK, COLOR_BLACK);
+	init_pair(4, COLOR_BLUE, COLOR_BLUE);
+	init_pair(5, COLOR_CYAN, COLOR_CYAN);
+	init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
 }
 
 void redraw() {
@@ -153,7 +158,7 @@ void redraw() {
 void initUI() {
 	initscr();
 	setColor();
-	
+
 	clear();
 	cbreak();
 	keypad(stdscr, TRUE);
