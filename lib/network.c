@@ -13,6 +13,7 @@
 
 #include "ui.h"
 #include "network.h"
+#include "logic.h"
 #include "system.h"
 
 void setArgs() {
@@ -39,6 +40,9 @@ void runClient() {
 	initUI();
 
 	while (1) {
+		initAvailable();
+		redraw();
+
 		char *encoded = encodeData(data);
 		sendMessage(connFd, encoded);
 		
@@ -47,8 +51,9 @@ void runClient() {
 
 		char received[256];
 		received[0] = '\0';
+
 		int bytes = receiveMessage(connFd, received, sizeof(received));
-		if (!strcmp(received, "SERVER_CLOSED")) { 
+		if (!strcmp(received, "SERVER_CLOSED")) {
 			disposeUI();
 			sendMessage(connFd, "CLIENT_CLOSED");
 			shutdown(connFd, SHUT_RDWR);
@@ -57,6 +62,7 @@ void runClient() {
 
 		if (bytes > 0) {
 			data = decodeData(received);
+			setAvailable();
 			turn = CLIENT;
 		}
 		
@@ -80,7 +86,7 @@ void runServer() {
 	int connFd = listenAtPort(port);
 
 	initUI();
-
+	
 	while (1) {
 		char received[256];
 		received[0] = '\0';
@@ -90,6 +96,7 @@ void runServer() {
 
 		if (bytes > 0) {
 			data = decodeData(received);
+			setAvailable();
 			turn = SERVER;
 		}
 		redraw();
@@ -99,10 +106,10 @@ void runServer() {
 			received[0] = '\0';
 			sendMessage(connFd, "SERVER_CLOSED");
 			bytes = receiveMessage(connFd, received, sizeof(received));
-			printf("%s\n", received);
-			if (!strcmp(received, "CLIENT_CLOSED")) break; 
+			if (!strcmp(received, "CLIENT_CLOSED")) break;
 		}
 
+		initAvailable();
 		redraw();
 
 		char *encoded = encodeData(data);
@@ -114,6 +121,16 @@ void runServer() {
 
 	disposeUI();
 	shutdown(connFd, SHUT_RDWR);
+}
+
+void visData() {
+	for (int i = 0; i < gridR; i++) {
+		for (int j = 0; j < gridC; j++) {
+			printf("%2d ", data[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 }
 
 char *encodeData(int **data) {
@@ -176,7 +193,7 @@ int listenAtPort(int portnum) {
 	if (setsockopt(sock_fd, SOL_TCP, TCP_NODELAY, &opt, sizeof(opt)) != 0) terminate(SSO_FAIL);
 
 	struct sockaddr_in address;
-	bzero(&address, sizeof(address)); 
+	bzero(&address, sizeof(address));
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY /* localhost */;
 	address.sin_port = htons(portnum);
