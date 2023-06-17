@@ -100,12 +100,77 @@ bool noAvailable() {
 	return true;
 }
 
+bool gameover() {
+	return hasNoStone() || isFull() || bothSkipped();
+}
+
+bool hasNoStone() {
+	int r = gridR;
+	int c = gridC;
+	
+	bool noMyStone = true;
+	bool noOpStone = true;
+
+	for (int i = 0; i < r; i++) {
+		for (int j = 0; j < c; j++) {
+			if (data[i][j] == role) noMyStone = false;
+			if (data[i][j] == -role) noOpStone = false;
+		}
+	}
+
+	if (noMyStone) winner = -role;
+	if (noOpStone) winner = role;
+
+	return noMyStone || noOpStone;
+}
+
 bool isFull() {
 	int r = gridR;
 	int c = gridC;
+	
+	bool full = true;
 
-	for (int i = 0; i < r; i++)
-		for (int j = 0; j < c; j++)
-			if (!data[i][j]) return false;
-	return true;
+	for (int i = 0; i < r; i++) {
+		for (int j = 0; j < c; j++) {
+			int v = data[i][j];
+			if (!v || v == 2 || v == -2) {
+				full = false; break;
+			}
+		}
+	}
+
+	int sum = sumStones();
+	
+	winner = !!sum;
+	if (sum < 0) winner = CLIENT;
+
+	return full;
+}
+
+bool bothSkipped() {
+	bool ret = isSkipped() && noAvailable();
+
+	int sum = sumStones();
+	
+	winner = !!sum;
+	if (sum < 0) winner = CLIENT;
+
+	return ret;
+}
+
+int sumStones() {
+	int r = gridR;
+	int c = gridC;
+	
+	int sum = 0;
+
+	for (int i = 0; i < r; i++) {
+		for (int j = 0; j < c; j++) {
+			int v = data[i][j];
+			if (v == 2 || v == -2) continue;
+			sum += v;
+		}
+	}
+	
+	return sum;
 }

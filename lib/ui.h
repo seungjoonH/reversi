@@ -3,6 +3,7 @@
 
 #include "enums.h"
 
+int **before;
 int **data;
 
 extern int gridLty;
@@ -16,6 +17,9 @@ extern int pX;
 int getCh();
 
 void logo(int lty, int ltx);
+void win(int lty, int ltx);
+void draw(int lty, int ltx);
+void lose(int lty, int ltx);
 void rectangle(int lty, int ltx, int w, int h);
 void fill(int lty, int ltx, int size, int player);
 void drawGrid();
@@ -33,5 +37,6 @@ void setColor();
 void redraw();
 void initUI();
 void disposeUI();
+void isFinished();
 
 #endif
