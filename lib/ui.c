@@ -221,6 +221,7 @@ void isFinished() {
 	initscr();
 	clear();
 
+	gameover();
 	if (!winner) draw(10, 11);
 	else if (role == winner) win(10, 11);
 	else lose(10, 11);

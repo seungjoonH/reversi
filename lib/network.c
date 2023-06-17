@@ -76,8 +76,7 @@ void runClient() {
 		c = execute();
 		if (c == -1) { 
 			sendMessage(connFd, "GAME_FINISHED");
-			isFinished();
-			break;
+			finished = true; isFinished(); break;
 		}
 		if (c == 'q') {
 			sendMessage(connFd, "CLIENT_CLOSED");
@@ -105,7 +104,9 @@ void runServer() {
 		received[0] = '\0';
 
 		int bytes = receiveMessage(connFd, received, sizeof(received));
-		if (!strcmp(received, "GAME_FINISHED")) { isFinished(); break; }
+		if (!strcmp(received, "GAME_FINISHED")) { 
+			finished = true; isFinished(); break; 
+		}
 		else if (!strcmp(received, "CLIENT_CLOSED")) break;
 
 		if (bytes > 0) {
