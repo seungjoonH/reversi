@@ -1,3 +1,7 @@
+/* TEAM MEMBER */
+// Hyeon Seungjoon (21800788)
+// Song San (22000375)
+
 #include <stdio.h>
 
 #include "lib/system.h"
