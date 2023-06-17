@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -121,6 +122,19 @@ void runServer() {
 
 	disposeUI();
 	shutdown(connFd, SHUT_RDWR);
+}
+
+void backupData() {
+	for (int i = 0; i < gridR; i++)
+		for (int j = 0; j < gridC; j++)
+			before[i][j] = data[i][j];
+}
+
+bool isSkipped() {
+	for (int i = 0; i < gridR; i++)
+		for (int j = 0; j < gridC; j++)
+			if (before[i][j] != data[i][j]) return false;
+	return true;
 }
 
 void visData() {

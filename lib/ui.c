@@ -18,12 +18,36 @@ int pX = 4;
 int getCh() { return getch(); }
 
 void logo(int lty, int ltx) {
-	mvprintw(lty + 0, ltx, "  _____  ________      ________ _____   _____ _____ ");
-	mvprintw(lty + 1, ltx, " |  __ \\|  ____\\ \\    / /  ____|  __ \\ / ____|_   _|");
-	mvprintw(lty + 2, ltx, " | |__) | |__   \\ \\  / /| |__  | |__) | (___   | |  ");
-	mvprintw(lty + 3, ltx, " |  _  /|  __|   \\ \\/ / |  __| |  _  / \\___ \\  | |  ");
-	mvprintw(lty + 4, ltx, " | | \\ \\| |____   \\  /  | |____| | \\ \\ ____) |_| |_ ");
-	mvprintw(lty + 5, ltx, " |_|  \\_\\______|   \\/   |______|_|  \\_\\_____/|_____|");
+	mvprintw(lty + 0, ltx, "######  ####### ##    ## ####### ######  ####### ## ");	
+	mvprintw(lty + 1, ltx, "##   ## ##      ##    ## ##      ##   ## ##      ## ");	
+	mvprintw(lty + 2, ltx, "######  #####   ##    ## #####   ######  ####### ## ");	
+	mvprintw(lty + 3, ltx, "##   ## ##       ##  ##  ##      ##   ##      ## ## ");	
+	mvprintw(lty + 4, ltx, "##   ## #######   ####   ####### ##   ## ####### ## ");	
+}
+
+void win(int lty, int ltx) {
+	mvprintw(lty + 0, ltx, "##    ##  ######  ##    ##     ##     ## ## ###    ## ## ");	
+	mvprintw(lty + 1, ltx, " ##  ##  ##    ## ##    ##     ##     ## ## ####   ## ## ");
+	mvprintw(lty + 2, ltx, "  ####   ##    ## ##    ##     ##  #  ## ## ## ##  ## ## ");
+	mvprintw(lty + 3, ltx, "   ##    ##    ## ##    ##     ## ### ## ## ##  ## ##    ");
+	mvprintw(lty + 4, ltx, "   ##     ######   ######       ### ###  ## ##   #### ## ");
+
+}
+
+void draw(int lty, int ltx) {
+	mvprintw(lty + 0, ltx, "######  ######   #####  ##     ## ");
+	mvprintw(lty + 1, ltx, "##   ## ##   ## ##   ## ##     ## ");
+	mvprintw(lty + 2, ltx, "##   ## ######  ####### ##  #  ## ");
+	mvprintw(lty + 3, ltx, "##   ## ##   ## ##   ## ## ### ## ");
+	mvprintw(lty + 4, ltx, "######  ##   ## ##   ##  ### ###  ");
+}
+
+void lose(int lty, int ltx) {
+	mvprintw(lty + 0, ltx, "##    ##  ######  ##    ##     ##       ######  ####### ####### ");
+	mvprintw(lty + 1, ltx, " ##  ##  ##    ## ##    ##     ##      ##    ## ##      ##      ");
+	mvprintw(lty + 2, ltx, "  ####   ##    ## ##    ##     ##      ##    ## ####### #####   ");
+	mvprintw(lty + 3, ltx, "   ##    ##    ## ##    ##     ##      ##    ##      ## ##      ");
+	mvprintw(lty + 4, ltx, "   ##     ######   ######      #######  ######  ####### ####### ");
 }
 
 void rectangle(int lty, int ltx, int w, int h) {
@@ -100,10 +124,13 @@ void drawGrid() {
 	}
 }
 
-void initBoard() {	
+void initBoard() {
+	before = (int **) malloc(gridR * sizeof(int *));
 	data = (int **) malloc(gridR * sizeof(int *));
-	for (int i = 0; i < gridR; i++)
+	for (int i = 0; i < gridR; i++) {
+		before[i] = (int *) malloc(gridC * sizeof(int));
 		data[i] = (int *) malloc(gridC * sizeof(int));
+	}
 
 	for (int i = 0; i < gridR; i++)
 		for (int j = 0; j < gridC; j++)
@@ -118,7 +145,9 @@ int execute() {
 	int c, term = 0;
 	flushinp();
 	
+	if (gameover()) { isFinished(); return 0; }
 	if (noAvailable()) return 0;
+
 	while ((c = getch())) {
 		term = 0;
 		switch (c) {
@@ -146,6 +175,7 @@ int put(int val) {
 	data[pY][pX] = val;
 	flip(pY, pX);
 	redraw();
+	backupData();
 	return 0;
 }
 
@@ -185,4 +215,20 @@ void disposeUI() {
 	attroff(1);
 	endwin();
 	free(data);
+}
+
+void isFinished() {
+	initscr();
+	clear();
+
+	if (!winner) draw(10, 11);
+	else if (role == winner) win(10, 11);
+	else lose(10, 11);
+
+	refresh();
+	
+	getch();
+	disposeUI();
+
+	exit(0);
 }
