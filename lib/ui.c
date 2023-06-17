@@ -42,11 +42,16 @@ void rectangle(int lty, int ltx, int w, int h) {
 
 void fill(int lty, int ltx, int size, int value) {
 	int color = value + 3;
+	int abs = value < 0 ? -value : value;
+
 	attron(COLOR_PAIR(color));
 
-	for (int i = 0; i < size - 1; i++)
-		for (int j = 0; j < size * 2 - 1; j++)
-			mvaddch(lty + i, ltx + j, ' ');
+	if (abs < 2) {
+		for (int i = 0; i < size - 1; i++)
+			for (int j = 0; j < size * 2 - 1; j++)
+				mvaddch(lty + i, ltx + j, ' ');
+	}
+	else rectangle(lty, ltx, size * 2 - 2, size - 2);
 
 	attroff(COLOR_PAIR(color));
 }
@@ -63,6 +68,7 @@ void drawGrid() {
 		for (int j = 0; j < c; j++) {
 			int x = ltx + j * s * 2;
 			rectangle(y, x, s * 2, s);
+			fill(y + 1, x + 1, s, 0);
 			if (i && j) mvaddch(y, x, ACS_PLUS);
 		}
 	}
@@ -142,11 +148,11 @@ int put(int val) {
 
 void setColor() {
 	start_color();
-	init_pair(1, COLOR_MAGENTA, COLOR_MAGENTA);
-	init_pair(2, COLOR_RED, COLOR_RED);
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	init_pair(2, COLOR_GREEN, COLOR_GREEN);
 	init_pair(3, COLOR_BLACK, COLOR_BLACK);
-	init_pair(4, COLOR_BLUE, COLOR_BLUE);
-	init_pair(5, COLOR_CYAN, COLOR_CYAN);
+	init_pair(4, COLOR_WHITE, COLOR_WHITE);
+	init_pair(5, COLOR_WHITE, COLOR_BLACK);
 	init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
 }
 

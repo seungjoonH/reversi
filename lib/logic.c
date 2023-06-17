@@ -73,12 +73,15 @@ void dirSearch(int i, int j, Direction dir, int value) {
 		if (data[aI][aJ] == value && cnt > 1) break;
 		if (data[aI][aJ] != -role) return;
 		
-		if (value) data[aI][aJ] = role;
 		cnt++;
 	}
 
-	if (value) return;
-	data[aI][aJ] = role * 2;
+	if (value) {
+		if (!data[aI][aJ]) return;
+		for (int c = 1; c < cnt; c++)
+			data[i + dI * c][j + dJ * c] = value;
+	}
+	else data[aI][aJ] = role * 2;
 }
 
 void flip(int i, int j) {
