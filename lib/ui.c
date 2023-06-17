@@ -145,7 +145,7 @@ int execute() {
 	int c, term = 0;
 	flushinp();
 	
-	if (gameover()) { isFinished(); return 0; }
+	if (gameover()) return -1;
 	if (noAvailable()) return 0;
 
 	while ((c = getch())) {

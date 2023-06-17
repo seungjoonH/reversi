@@ -54,7 +54,8 @@ void runClient() {
 		received[0] = '\0';
 
 		int bytes = receiveMessage(connFd, received, sizeof(received));
-		if (!strcmp(received, "SERVER_CLOSED")) {
+		if (!strcmp(received, "GAME_FINISHED")) isFinished();
+		else if (!strcmp(received, "SERVER_CLOSED")) {
 			disposeUI();
 			sendMessage(connFd, "CLIENT_CLOSED");
 			shutdown(connFd, SHUT_RDWR);
@@ -70,6 +71,10 @@ void runClient() {
 		redraw();
 
 		c = execute();
+		if (c == -1) { 
+			sendMessage(connFd, "GAME_FINISHED");
+			isFinished();
+		}
 		if (c == 'q') {
 			sendMessage(connFd, "CLIENT_CLOSED");
 			break;
@@ -93,7 +98,8 @@ void runServer() {
 		received[0] = '\0';
 
 		int bytes = receiveMessage(connFd, received, sizeof(received));
-		if (!strcmp(received, "CLIENT_CLOSED")) break;
+		if (!strcmp(received, "GAME_FINISHED")) isFinished();
+		else if (!strcmp(received, "CLIENT_CLOSED")) break;
 
 		if (bytes > 0) {
 			data = decodeData(received);
@@ -103,6 +109,10 @@ void runServer() {
 		redraw();
 
 		c = execute();
+		if (c == -1) {
+			sendMessage(connFd, "GAME_FINISHED");
+			isFinished();
+		}
 		if (c == 'q') {
 			received[0] = '\0';
 			sendMessage(connFd, "SERVER_CLOSED");
