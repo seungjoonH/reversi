@@ -21,12 +21,7 @@
 
 ## How to build
 
-1. 이 레포지토리를 `git clone` 합니다.
-
-```
-git clone https://github.com/seungjoonH/reversi.git
-```
-
+1. 버전 0.0.1 를 Linux OS 환경에 다운로드 받습니다.
 2. clone 된 디렉토리 위치로 이동합니다.
 3. 소스코드를 컴파일 합니다. (C compiler required)
 
