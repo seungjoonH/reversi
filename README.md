@@ -16,6 +16,7 @@
 이 프로젝트를 실행하기 위해서는 다음이 필요합니다.
 
 * C compiler
+* `ncurses` library
 * Socket server
 * Linux OS
 
@@ -23,7 +24,13 @@
 
 1. 버전 0.0.1 를 Linux OS 환경에 다운로드 받습니다.
 2. clone 된 디렉토리 위치로 이동합니다.
-3. 소스코드를 컴파일 합니다. (C compiler required)
+3. `nucurses` library 를 설치합니다.
+
+```
+sudo apt install libncursesw5-dev
+```
+
+4. 소스코드를 컴파일 합니다. (C compiler required)
 
 ```
 make
@@ -40,10 +47,28 @@ make
   ```
   ./reversi -client [Ip addr] [Port]  # for client
   ```
-  
-  ## Usage
-  
-  1. reversi 게임을 설치합니다.
-  2. 방향키를 사용하여 게임 보드의 커서를 움직입니다.
-  3. 스페이스 바를 눌러 원하는 위치에 말을 놓습니다.
-  4. `q` 를 눌러 종료합니다.
+
+## Usage
+
+1. reversi 게임을 설치합니다.
+2. 방향키를 사용하여 게임 보드의 커서를 움직입니다.
+3. 스페이스 바를 눌러 원하는 위치에 말을 놓습니다.
+4. `q` 를 눌러 종료합니다.
+
+## Screenshot
+
+### 서버접속
+
+![access](https://github.com/seungjoonH/reversi/blob/main/asset/screenshot/access.png)
+
+### 게임시작
+
+![start](https://github.com/seungjoonH/reversi/blob/main/asset/screenshot/start.png)
+
+### 게임 중
+
+![end](https://github.com/seungjoonH/reversi/blob/main/asset/screenshot/end.png)
+
+### 게임오버
+
+![over](https://github.com/seungjoonH/reversi/blob/main/asset/screenshot/over.png)
